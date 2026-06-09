@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from "react";
+import addDrawControl from "../mapTools/draw-control.js"
 import L from "leaflet";
-import '../styles/WebMap.css'
+import "../styles/WebMap.css";
+
 
 const WebMap = () => {
   const mapContainerRef = useRef(null);
@@ -11,9 +13,14 @@ const WebMap = () => {
       return;
     }
     webMapRef.current = L.map(mapContainerRef.current).setView([40, 37], 3);
-    L.tileLayer("https://www.google.cn/maps/vt?lyrs=s@189&gl=cr&x={x}&y={y}&z={z}", {
-      maxZoom: 13,
-    }).addTo(webMapRef.current);
+    L.tileLayer(
+      "https://www.google.cn/maps/vt?lyrs=s@189&gl=cr&x={x}&y={y}&z={z}",
+      {
+        maxZoom: 13,
+      },
+    ).addTo(webMapRef.current);
+
+    addDrawControl(webMapRef.current);
 
     return () => {
       if (webMapRef.current) {
@@ -23,12 +30,7 @@ const WebMap = () => {
     };
   }, []);
 
-  return (
-    <div
-      ref={mapContainerRef}
-      className="mapContainer"
-    />
-  );
+  return <div ref={mapContainerRef} className="mapContainer" />;
 };
 
 export default WebMap;

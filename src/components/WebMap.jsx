@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import addDrawControl from "../mapTools/draw-control.js"
+import manageDrawControl from "../mapTools/draw-control.js"
 import L from "leaflet";
 import "../styles/WebMap.css";
 
@@ -20,7 +20,7 @@ const WebMap = () => {
       },
     ).addTo(webMapRef.current);
 
-    addDrawControl(webMapRef.current);
+    manageDrawControl(webMapRef.current);
 
     return () => {
       if (webMapRef.current) {

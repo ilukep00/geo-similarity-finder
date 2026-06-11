@@ -22,7 +22,7 @@ function manageDrawControl(map) {
   const drawControlOptions = {
     position: "topleft",
     draw: {
-      DRAW_VECTORTYPES_SETTINGS,
+      ...DRAW_VECTORTYPES_SETTINGS,
     },
     edit: {
       featureGroup: drawnItems,
@@ -32,15 +32,14 @@ function manageDrawControl(map) {
   map.addControl(drawControl);
 
   map.on(L.Draw.Event.CREATED, function (e) {
-    var type = e.layerType,
-      layer = e.layer;
-
-    if (type === "marker") {
-      layer.bindPopup("A popup!");
-    }
-
+    const { layer } = e;
+ 
     drawnItems.addLayer(layer);
   });
 }
 
 export default manageDrawControl;
+
+/*
+
+*/

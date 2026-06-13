@@ -2,6 +2,9 @@
 
 # dependencies
 /react-app/node_modules
+/similarity-service/__pycache__
+/similarity-service/venv
+
 /.pnp
 .pnp.js
 

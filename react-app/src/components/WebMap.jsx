@@ -15,9 +15,6 @@ const WebMap = () => {
     webMapRef.current = L.map(mapContainerRef.current).setView([40, 37], 3);
     L.tileLayer(
       "https://www.google.cn/maps/vt?lyrs=s@189&gl=cr&x={x}&y={y}&z={z}",
-      {
-        maxZoom: 13,
-      },
     ).addTo(webMapRef.current);
 
     manageDrawControl(webMapRef.current);

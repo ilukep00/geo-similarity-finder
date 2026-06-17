@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
+from geoProcessing.geoProcessing import geoProcessGeoJSONSend
+
 
 
 class TileCoords(BaseModel):
@@ -26,6 +28,7 @@ app.add_middleware(
 async def find_similar_regions(item: Region):
     print(item.r_geometry)
     print(item.r_tilesCoords)
+    geoProcessGeoJSONSend(item)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

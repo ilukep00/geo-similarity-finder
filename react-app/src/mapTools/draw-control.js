@@ -79,9 +79,8 @@ function manageDrawControl(map) {
     const { layer, target = { _layers: {} } } = e;
     const layerJSON = layer.toGeoJSON();
     const tilesCoords = prepareTilesCoordinates(target._layers);
-    await findSimilarRegions(layerJSON, tilesCoords);
-
     drawnItems.addLayer(layer);
+    await findSimilarRegions(layerJSON, tilesCoords);
   });
 }
 

@@ -46,20 +46,19 @@ def mergeTilesIntoASingleTif(tiles):
                 image_rasters.append(img_tif)
 
     image_merged, transform_merged = merge(image_rasters)
-    with rasterio.open(
-            "merged.tif",
-            "w",
+    raster_merged = rasterio.MemoryFile().open(
             driver="GTiff",
             height=image_merged.shape[1],
             width=image_merged.shape[2],
             count=image_rasters[0].count,
-            crs="EPSG:4326",
+            crs="EPSG:3857",
             dtype='uint8',
             transform=transform_merged,
-    ) as raster_merged:
-        raster_merged.write(image_merged)
+        )
+    raster_merged.write(image_merged)
     for image_raster in image_rasters:
         image_raster.close()
+    return raster_merged
 
 def getGeoJSONRasterRegion(raster_tif, geoJSON):
     with fiona.open(geoJSON, "r") as f:
@@ -82,6 +81,5 @@ def getGeoJSONRasterRegion(raster_tif, geoJSON):
 def geoProcessGeoJSONSend(region):
     geoJSON = region.r_geometry
     tiles = region.r_tilesCoords
-    mergeTilesIntoASingleTif(tiles)
-    merged_raster = rasterio.open("merged.tif")
-    getGeoJSONRasterRegion(merged_raster, geoJSON)
+    raster_merged = mergeTilesIntoASingleTif(tiles)
+    getGeoJSONRasterRegion(raster_merged, geoJSON)

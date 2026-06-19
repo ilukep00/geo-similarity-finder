@@ -38,7 +38,7 @@ def mergeTilesIntoASingleTif(tiles):
                     height=img.height,
                     width=img.width,
                     count=img.count,
-                    crs="EPSG:4326",
+                    crs="EPSG:3857",
                     dtype=img.dtypes[0],
                     transform=img_transform,
                 )

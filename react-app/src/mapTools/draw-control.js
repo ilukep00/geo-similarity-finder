@@ -45,7 +45,7 @@ async function findSimilarRegions(regionJSON, tilesCoords) {
     },
     body: JSON.stringify({
       r_geometry: JSON.stringify(regionJSON),
-      r_tilesCoords: tilesCoords
+      r_tilesCoords: tilesCoords,
     }),
   };
 

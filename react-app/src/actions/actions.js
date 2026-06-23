@@ -1,12 +1,11 @@
 // To define the actions to execute
 import { NEXT, BACK } from './actionTypes';
 
-export const next = (value) => ({
+export const next = () => ({
   type: NEXT,
-  payload: value,
+
 });
 
-export const back = (value) => ({
+export const back = () => ({
   type: BACK,
-  payload: value,
 });

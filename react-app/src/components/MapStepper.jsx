@@ -12,7 +12,6 @@ const steps = ['Select the area to predict', 'Select the region of interest', 'F
 
 export default function MapStepper() {
   const dispacth = useDispatch();
-  const state = useSelector(state => state);
   const [activeStep, setActiveStep] = React.useState(0);
 
   const isStepOptional = React.useCallback((step) => {
@@ -21,12 +20,12 @@ export default function MapStepper() {
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    dispacth(next(state));
+    dispacth(next());
   };
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
-    dispacth(back(state));
+    dispacth(back());
   };
 
   const handleReset = () => {

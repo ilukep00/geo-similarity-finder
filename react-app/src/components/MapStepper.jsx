@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { next, back } from '../actions/actions';
 import Box from '@mui/material/Box';
 import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
@@ -8,7 +10,9 @@ import Typography from '@mui/material/Typography';
 
 const steps = ['Select the area to predict', 'Select the region of interest', 'Find Similarities'];
 
-export default function HorizontalLinearStepper() {
+export default function MapStepper() {
+  const dispacth = useDispatch();
+  const state = useSelector(state => state);
   const [activeStep, setActiveStep] = React.useState(0);
 
   const isStepOptional = React.useCallback((step) => {
@@ -17,10 +21,12 @@ export default function HorizontalLinearStepper() {
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    dispacth(next(state));
   };
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    dispacth(back(state));
   };
 
   const handleReset = () => {

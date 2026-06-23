@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { useSelector } from 'react-redux';
 import manageDrawControl from "../mapTools/draw-control.js"
 import L from "leaflet";
 import "../styles/WebMap.css";
@@ -7,6 +8,7 @@ import "../styles/WebMap.css";
 const WebMap = () => {
   const mapContainerRef = useRef(null);
   const webMapRef = useRef(null);
+  const {step} = useSelector(state => state);
 
   useEffect(() => {
     if (webMapRef.current) {
@@ -17,7 +19,7 @@ const WebMap = () => {
       "https://www.google.cn/maps/vt?lyrs=s@189&gl=cr&x={x}&y={y}&z={z}",
     ).addTo(webMapRef.current);
 
-    manageDrawControl(webMapRef.current);
+    manageDrawControl(webMapRef.current, step);
 
     return () => {
       if (webMapRef.current) {
@@ -25,7 +27,7 @@ const WebMap = () => {
         webMapRef.current = null;
       }
     };
-  }, []);
+  }, [step]);
 
   return <div ref={mapContainerRef} className="mapContainer" />;
 };

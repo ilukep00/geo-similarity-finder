@@ -59,7 +59,7 @@ async function findSimilarRegions(regionJSON, tilesCoords) {
   );
 }
 
-function manageDrawControl(map) {
+function manageDrawControl(map, step) {
   var drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
 

@@ -16,9 +16,15 @@ const steps = [
 
 export default function MapStepper() {
   const dispacth = useDispatch();
+  const { areaToPredict } = useSelector((state) => state);
+
+
   const [activeStep, setActiveStep] = React.useState(0);
 
   const handleNext = () => {
+    if(activeStep === 0 && areaToPredict=== false){
+      return;
+    }
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
     dispacth(next());
   };

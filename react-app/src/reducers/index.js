@@ -1,3 +1,10 @@
 import step from "./step";
+import areaToPredict from "./areaToPredict";
+import { combineReducers } from 'redux'
 
-export default step;
+const reducers = combineReducers({
+  step,
+  areaToPredict
+})
+
+export default reducers

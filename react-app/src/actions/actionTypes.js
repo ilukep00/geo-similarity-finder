@@ -2,3 +2,4 @@
 
 export const NEXT = 'NEXT';
 export const BACK = 'BACK';
+export const AREATOPREDICTADDED = 'AREATOPREDICTADDED';

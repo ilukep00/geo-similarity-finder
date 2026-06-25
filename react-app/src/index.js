@@ -5,9 +5,9 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import step from './reducers';
+import reducers from './reducers';
 
-let store = createStore(step)
+let store = createStore(reducers)
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

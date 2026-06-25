@@ -1,24 +1,17 @@
 import { BACK, NEXT } from "../actions/actionTypes";
 
-const initialState = {
-    step: 1
-}
+const initialState = 1
 
-const step = (state = initialState, action) => {
+const step = (stateStep = initialState, action) => {
   switch (action.type) {
     case NEXT:
-      return {
-        ...state,
-        step: state.step + 1,
-      };
+      return stateStep + 1;
+
     case BACK:
-      return {
-        ...state,
-        step: state.step - 1,
-      };
+      return stateStep - 1;
 
     default:
-      return state;
+      return stateStep;
   }
 };
 

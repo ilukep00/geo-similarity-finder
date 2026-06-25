@@ -1,14 +1,19 @@
 import React, { useEffect, useRef } from "react";
-import { useSelector } from 'react-redux';
-import manageDrawControl from "../mapTools/draw-control.js"
+import { useDispatch, useSelector } from "react-redux";
+import manageDrawControl from "../mapTools/draw-control.js";
+import { areaToPredictAdded } from "../actions/actions.js";
 import L from "leaflet";
 import "../styles/WebMap.css";
 
-
 const WebMap = () => {
+  const dispacth = useDispatch();
   const mapContainerRef = useRef(null);
   const webMapRef = useRef(null);
-  const {step} = useSelector(state => state);
+  const { step } = useSelector((state) => state);
+
+  const updateAreaToPredict = (value) => {
+    dispacth(areaToPredictAdded(value));
+  };
 
   useEffect(() => {
     if (webMapRef.current) {
@@ -19,7 +24,7 @@ const WebMap = () => {
       "https://www.google.cn/maps/vt?lyrs=s@189&gl=cr&x={x}&y={y}&z={z}",
     ).addTo(webMapRef.current);
 
-    manageDrawControl(webMapRef.current, step);
+    manageDrawControl(webMapRef.current, step, updateAreaToPredict);
 
     return () => {
       if (webMapRef.current) {

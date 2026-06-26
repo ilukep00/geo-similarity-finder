@@ -1,6 +1,7 @@
 import L from "leaflet";
 import "leaflet-draw";
 import "leaflet-draw/dist/leaflet.draw.css";
+import store from "../store";
 
 const GOOGLE_MAPS_URL =
   "https://www.google.cn/maps/vt?lyrs=s@189&gl=cr&x={x}&y={y}&z={z}";
@@ -59,7 +60,7 @@ async function findSimilarRegions(regionJSON, tilesCoords) {
   );
 }
 
-function manageDrawControl(map, updateAreaToPredict) {
+function manageDrawControl(map, updateAreaToPredict, updateRegionOfInterest) {
   var drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
 
@@ -76,13 +77,28 @@ function manageDrawControl(map, updateAreaToPredict) {
   map.addControl(drawControl);
 
   map.on(L.Draw.Event.CREATED, async function (e) {
+    const state = store.getState();
     const { layer, target = { _layers: {} } } = e;
     const layerJSON = layer.toGeoJSON();
     const tilesCoords = prepareTilesCoordinates(target._layers);
     drawnItems.addLayer(layer);
     await findSimilarRegions(layerJSON, tilesCoords);
-    updateAreaToPredict(true)
+    if (state.step === 1) {
+      updateAreaToPredict(true);
+    }
+    if (state.step === 2){
+      updateRegionOfInterest(true)
+    }
+  });
 
+  map.on(L.Draw.Event.DELETED, async function (e) {
+    const state = store.getState();
+    if (state.step === 1) {
+      updateAreaToPredict(false);
+    }
+    if (state.step === 2){
+      updateRegionOfInterest(false);
+    }
   });
 }
 

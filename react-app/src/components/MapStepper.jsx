@@ -14,24 +14,24 @@ const steps = [
   "Find Similarities",
 ];
 
-const errors = [
-  "There is not area selected",
-  "There is not region selected"
-]
+const errors = ["There is not area selected", "There is not region selected"];
 
 export default function MapStepper() {
   const dispacth = useDispatch();
-  const { areaToPredict } = useSelector((state) => state);
+  const { areaToPredict, regionOfInterest } = useSelector((state) => state);
 
   const [activeStep, setActiveStep] = React.useState(0);
   const [stepFailed, setStepFailed] = React.useState(-1);
 
   const handleNext = () => {
-    if (activeStep === 0 && areaToPredict === false) {
+    if (
+      (activeStep === 0 && areaToPredict === false) ||
+      (activeStep === 1 && regionOfInterest === false)
+    ) {
       setStepFailed(activeStep);
       return;
     }
-    if(isStepFailed !== -1){
+    if (isStepFailed !== -1) {
       setStepFailed(-1);
     }
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -79,7 +79,7 @@ export default function MapStepper() {
           const stepProps = {};
           const labelProps = {};
           if (isStepFailed(index)) {
-            const error = errors[index]
+            const error = errors[index];
             labelProps.optional = (
               <Typography variant="caption" color="error">
                 {error}

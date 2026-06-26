@@ -9,7 +9,6 @@ const WebMap = () => {
   const dispacth = useDispatch();
   const mapContainerRef = useRef(null);
   const webMapRef = useRef(null);
-  const { step } = useSelector((state) => state);
 
   const updateAreaToPredict = (value) => {
     dispacth(areaToPredictAdded(value));
@@ -24,7 +23,7 @@ const WebMap = () => {
       "https://www.google.cn/maps/vt?lyrs=s@189&gl=cr&x={x}&y={y}&z={z}",
     ).addTo(webMapRef.current);
 
-    manageDrawControl(webMapRef.current, step, updateAreaToPredict);
+    manageDrawControl(webMapRef.current, updateAreaToPredict);
 
     return () => {
       if (webMapRef.current) {
@@ -32,7 +31,7 @@ const WebMap = () => {
         webMapRef.current = null;
       }
     };
-  }, [step]);
+  }, []);
 
   return <div ref={mapContainerRef} className="mapContainer" />;
 };

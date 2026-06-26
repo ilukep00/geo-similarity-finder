@@ -1,5 +1,5 @@
 // To define the actions to execute
-import { NEXT, BACK, AREATOPREDICTADDED } from './actionTypes';
+import { NEXT, BACK, AREATOPREDICTADDED, REGIONOFINTERESTADDED } from './actionTypes';
 
 export const next = () => ({
   type: NEXT,
@@ -12,5 +12,10 @@ export const back = () => ({
 
 export const areaToPredictAdded = (value) => ({
   type: AREATOPREDICTADDED,
+  payload: value
+})
+
+export const regionOfInterestAdded = (value) => ({
+  type: REGIONOFINTERESTADDED,
   payload: value
 })

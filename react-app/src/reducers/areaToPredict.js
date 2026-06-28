@@ -1,6 +1,6 @@
 import { AREATOPREDICTADDED } from "../actions/actionTypes";
 
-const initialState = false
+const initialState = false;
 
 const areaToPredict = (state = initialState, action) => {
   switch (action.type) {

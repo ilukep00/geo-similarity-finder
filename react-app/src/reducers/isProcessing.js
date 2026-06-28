@@ -1,6 +1,6 @@
 import { ISPROCESSING } from "../actions/actionTypes";
 
-const initialState = false
+const initialState = false;
 
 const isProcessing = (state = initialState, action) => {
   switch (action.type) {

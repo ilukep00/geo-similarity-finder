@@ -1,6 +1,6 @@
 import { REGIONOFINTERESTADDED } from "../actions/actionTypes";
 
-const initialState = false
+const initialState = false;
 
 const regionOfInterest = (state = initialState, action) => {
   switch (action.type) {

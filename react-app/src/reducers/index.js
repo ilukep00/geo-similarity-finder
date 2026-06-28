@@ -8,7 +8,7 @@ const reducers = combineReducers({
   step,
   areaToPredict,
   regionOfInterest,
-  isProcessing
+  isProcessing,
 });
 
 export default reducers;

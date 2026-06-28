@@ -1,6 +1,6 @@
 import { BACK, NEXT } from "../actions/actionTypes";
 
-const initialState = 1
+const initialState = 1;
 
 const step = (stateStep = initialState, action) => {
   switch (action.type) {

@@ -60,7 +60,12 @@ async function findSimilarRegions(regionJSON, tilesCoords) {
   );
 }
 
-function manageDrawControl(map, updateAreaToPredict, updateRegionOfInterest) {
+function manageDrawControl(
+  map,
+  updateAreaToPredict,
+  updateRegionOfInterest,
+  updateIsProcessing,
+) {
   var drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
 
@@ -82,12 +87,14 @@ function manageDrawControl(map, updateAreaToPredict, updateRegionOfInterest) {
     const layerJSON = layer.toGeoJSON();
     const tilesCoords = prepareTilesCoordinates(target._layers);
     drawnItems.addLayer(layer);
+    updateIsProcessing(true);
     await findSimilarRegions(layerJSON, tilesCoords);
+    updateIsProcessing(false);
     if (state.step === 1) {
       updateAreaToPredict(true);
     }
-    if (state.step === 2){
-      updateRegionOfInterest(true)
+    if (state.step === 2) {
+      updateRegionOfInterest(true);
     }
   });
 
@@ -96,7 +103,7 @@ function manageDrawControl(map, updateAreaToPredict, updateRegionOfInterest) {
     if (state.step === 1) {
       updateAreaToPredict(false);
     }
-    if (state.step === 2){
+    if (state.step === 2) {
       updateRegionOfInterest(false);
     }
   });

@@ -60,7 +60,7 @@ def mergeTilesIntoASingleTif(tiles):
         image_raster.close()
     return raster_merged
 
-def getGeoJSONRasterRegion(raster_tif, geoJSON):
+def getGeoJSONRasterRegion(raster_tif, geoJSON, fileName):
     with fiona.open(geoJSON, "r") as f:
         shapes = [feature["geometry"] for feature in f]
 
@@ -75,11 +75,16 @@ def getGeoJSONRasterRegion(raster_tif, geoJSON):
             "transform": out_transform,
         }
     )
-    with rasterio.open("geoJSON_img.tif", "w", **out_meta) as dst:
+    with rasterio.open(fileName+".tif", "w", **out_meta) as dst:
         dst.write(out_image)
 
 def geoProcessGeoJSONSend(region):
     geoJSON = region.r_geometry
     tiles = region.r_tilesCoords
-    raster_merged = mergeTilesIntoASingleTif(tiles)
-    getGeoJSONRasterRegion(raster_merged, geoJSON)
+    fileName = region.r_fileName
+    try:
+        raster_merged = mergeTilesIntoASingleTif(tiles)
+        getGeoJSONRasterRegion(raster_merged, geoJSON, fileName)
+    except Exception as e:
+        print(f"An unexpected error occurs: {e}")
+

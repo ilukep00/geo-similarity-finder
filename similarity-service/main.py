@@ -13,6 +13,7 @@ class TileCoords(BaseModel):
 class Region(BaseModel):
     r_geometry: str
     r_tilesCoords:  List[TileCoords]
+    r_fileName: str
 
 app = FastAPI()
 
@@ -28,6 +29,7 @@ app.add_middleware(
 async def find_similar_regions(item: Region):
     print(item.r_geometry)
     print(item.r_tilesCoords)
+    print(item.r_fileName)
     geoProcessGeoJSONSend(item)
 
 if __name__ == "__main__":

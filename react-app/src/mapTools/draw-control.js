@@ -38,7 +38,7 @@ function prepareTilesCoordinates(layers) {
 
   return tilesCoords;
 }
-async function findSimilarRegions(regionJSON, tilesCoords) {
+async function processGeometry(regionJSON, tilesCoords, fileName) {
   const queryBody = {
     method: "POST",
     headers: {
@@ -47,17 +47,20 @@ async function findSimilarRegions(regionJSON, tilesCoords) {
     body: JSON.stringify({
       r_geometry: JSON.stringify(regionJSON),
       r_tilesCoords: tilesCoords,
+      r_fileName: fileName,
     }),
   };
-
-  const response = await fetch(FIND_SIMILAR_REGIONS_URL, queryBody).then(
-    (response) => {
+  try {
+    await fetch(FIND_SIMILAR_REGIONS_URL, queryBody).then((response) => {
       if (!response.ok) {
         throw new Error(`HTTP error: ${response.status}`);
       }
       return response.json();
-    },
-  );
+    });
+    return true;
+  } catch (error) {
+    return false;
+  }
 }
 
 function manageDrawControl(
@@ -86,10 +89,20 @@ function manageDrawControl(
     const { layer, target = { _layers: {} } } = e;
     const layerJSON = layer.toGeoJSON();
     const tilesCoords = prepareTilesCoordinates(target._layers);
-    drawnItems.addLayer(layer);
+
     updateIsProcessing(true);
-    await findSimilarRegions(layerJSON, tilesCoords);
+    const result = await processGeometry(
+      layerJSON,
+      tilesCoords,
+      state.step === 1 ? "regionToPredict" : "regionOfInterest",
+    );
     updateIsProcessing(false);
+
+    if (!result) {
+      console.log("error");
+      return;
+    }
+    drawnItems.addLayer(layer);
     if (state.step === 1) {
       updateAreaToPredict(true);
     }

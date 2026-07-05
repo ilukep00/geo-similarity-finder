@@ -5,7 +5,6 @@ from typing import List
 from geoProcessing.geoProcessing import geoProcessGeoJSONSend
 
 
-
 class TileCoords(BaseModel):
     x: int
     y: int
@@ -25,8 +24,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/findSimilarRegions/")
-async def find_similar_regions(item: Region):
+@app.post("/geoProcessSelectedRegion/")
+async def geo_process_selected_region(item: Region):
     print(item.r_geometry)
     print(item.r_tilesCoords)
     print(item.r_fileName)

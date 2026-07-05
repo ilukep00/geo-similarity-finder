@@ -5,7 +5,7 @@ import store from "../store";
 
 const GOOGLE_MAPS_URL =
   "https://www.google.cn/maps/vt?lyrs=s@189&gl=cr&x={x}&y={y}&z={z}";
-const FIND_SIMILAR_REGIONS_URL = "http://127.0.0.1:8000/findSimilarRegions/";
+const GEOPROCESS_SELECTED_REGION_URL = "http://127.0.0.1:8000/geoProcessSelectedRegion/";
 
 const DRAW_VECTORTYPES_SETTINGS = {
   polyline: false,
@@ -51,7 +51,7 @@ async function processGeometry(regionJSON, tilesCoords, fileName) {
     }),
   };
   try {
-    await fetch(FIND_SIMILAR_REGIONS_URL, queryBody).then((response) => {
+    await fetch(GEOPROCESS_SELECTED_REGION_URL, queryBody).then((response) => {
       if (!response.ok) {
         throw new Error(`HTTP error: ${response.status}`);
       }

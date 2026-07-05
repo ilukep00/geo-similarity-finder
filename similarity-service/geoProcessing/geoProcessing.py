@@ -77,6 +77,8 @@ def getGeoJSONRasterRegion(raster_tif, geoJSON, fileName):
     )
     with rasterio.open(fileName+".tif", "w", **out_meta) as dst:
         dst.write(out_image)
+    with rasterio.open(fileName+".png", "w", **out_meta) as dst:
+        dst.write(out_image)
 
 def geoProcessGeoJSONSend(region):
     geoJSON = region.r_geometry

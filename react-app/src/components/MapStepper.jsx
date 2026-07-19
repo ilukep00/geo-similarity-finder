@@ -17,11 +17,33 @@ const steps = [
 const errors = ["There is not area selected", "There is not region selected"];
 
 export default function MapStepper() {
+  const FIND_SIMILAR_REGIONS_URL = "http://127.0.0.1:8000/findSimilarRegions/";
   const dispacth = useDispatch();
   const { areaToPredict, regionOfInterest } = useSelector((state) => state);
 
   const [activeStep, setActiveStep] = React.useState(0);
   const [stepFailed, setStepFailed] = React.useState(-1);
+
+  const callToSimilarityService = async () => {
+    const queryBody = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    };
+    try {
+      await fetch(FIND_SIMILAR_REGIONS_URL, queryBody).then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+        return response.json();
+      });
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
 
   const handleNext = () => {
     if (
@@ -33,6 +55,9 @@ export default function MapStepper() {
     }
     if (isStepFailed !== -1) {
       setStepFailed(-1);
+    }
+    if (activeStep === steps.length - 1) {
+      callToSimilarityService()
     }
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
     dispacth(next());

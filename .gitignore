@@ -24,6 +24,7 @@
 .idea
 *.tif
 *.xml
+*.png
 
 npm-debug.log*
 yarn-debug.log*

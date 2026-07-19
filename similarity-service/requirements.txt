@@ -5,3 +5,5 @@ rasterio
 requests
 mercantile
 fiona
+opencv-python
+google-genai

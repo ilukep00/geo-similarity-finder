@@ -15,6 +15,7 @@ import rasterio.plot
 import rasterio.mask
 from rasterio.transform import from_bounds
 from rasterio.merge import merge
+from rasterio.warp import transform_geom
 
 
 def mergeTilesIntoASingleTif(tiles):
@@ -27,10 +28,11 @@ def mergeTilesIntoASingleTif(tiles):
         z = tile.z
         url = "https://www.google.cn/maps/vt?lyrs=s@189&gl=cr&x=" + str(x) + "&y=" + str(y) + "&z=" + str(z)
         response = requests.get(url)
-        bounds = mercantile.bounds(x, y, z)
+        # For obtaining the coordinates in meters
+        bounds = mercantile.xy_bounds(x, y, z)
         with rasterio.MemoryFile(response.content) as memfile:
             with memfile.open() as img:
-                img_transform = from_bounds(bounds.west, bounds.south, bounds.east, bounds.north, width=img.width,
+                img_transform = from_bounds(bounds.left, bounds.bottom, bounds.right, bounds.top, width=img.width,
                                             height=img.height)
                 name = "response_" + str(i) + ".tif"
                 img_tif = rasterio.MemoryFile().open(
@@ -62,7 +64,9 @@ def mergeTilesIntoASingleTif(tiles):
 
 def getGeoJSONRasterRegion(raster_tif, geoJSON, fileName):
     with fiona.open(geoJSON, "r") as f:
-        shapes = [feature["geometry"] for feature in f]
+        geojson_crs = f.crs or "EPSG:4326"
+        #Converting the geometry to the raster crs
+        shapes = [ transform_geom(geojson_crs, raster_tif.crs, feature["geometry"]) for feature in f]
 
     out_image, out_transform = rasterio.mask.mask(raster_tif, shapes, crop=True)
 

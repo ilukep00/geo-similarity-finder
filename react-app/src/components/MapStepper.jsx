@@ -7,6 +7,7 @@ import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import callToService from "../utils/utilityMethods";
 
 const steps = [
   "Select the area to predict",
@@ -24,28 +25,7 @@ export default function MapStepper() {
   const [activeStep, setActiveStep] = React.useState(0);
   const [stepFailed, setStepFailed] = React.useState(-1);
 
-  const callToSimilarityService = async () => {
-    const queryBody = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({}),
-    };
-    try {
-      await fetch(FIND_SIMILAR_REGIONS_URL, queryBody).then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error: ${response.status}`);
-        }
-        return response.json();
-      });
-      return true;
-    } catch (error) {
-      return false;
-    }
-  };
-
-  const handleNext = () => {
+  const handleNext = async () => {
     if (
       (activeStep === 0 && areaToPredict === false) ||
       (activeStep === 1 && regionOfInterest === false)
@@ -57,7 +37,7 @@ export default function MapStepper() {
       setStepFailed(-1);
     }
     if (activeStep === steps.length - 1) {
-      callToSimilarityService()
+      await callToService(FIND_SIMILAR_REGIONS_URL);
     }
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
     dispacth(next());

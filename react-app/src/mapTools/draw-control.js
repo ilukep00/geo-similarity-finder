@@ -2,10 +2,12 @@ import L from "leaflet";
 import "leaflet-draw";
 import "leaflet-draw/dist/leaflet.draw.css";
 import store from "../store";
+import callToService from "../utils/utilityMethods";
 
 const GOOGLE_MAPS_URL =
   "https://www.google.cn/maps/vt?lyrs=s@189&gl=cr&x={x}&y={y}&z={z}";
-const GEOPROCESS_SELECTED_REGION_URL = "http://127.0.0.1:8000/geoProcessSelectedRegion/";
+const GEOPROCESS_SELECTED_REGION_URL =
+  "http://127.0.0.1:8000/geoProcessSelectedRegion/";
 
 const DRAW_VECTORTYPES_SETTINGS = {
   polyline: false,
@@ -39,28 +41,13 @@ function prepareTilesCoordinates(layers) {
   return tilesCoords;
 }
 async function processGeometry(regionJSON, tilesCoords, fileName) {
-  const queryBody = {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      r_geometry: JSON.stringify(regionJSON),
-      r_tilesCoords: tilesCoords,
-      r_fileName: fileName,
-    }),
-  };
-  try {
-    await fetch(GEOPROCESS_SELECTED_REGION_URL, queryBody).then((response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP error: ${response.status}`);
-      }
-      return response.json();
-    });
-    return true;
-  } catch (error) {
-    return false;
-  }
+  const body = JSON.stringify({
+    r_geometry: JSON.stringify(regionJSON),
+    r_tilesCoords: tilesCoords,
+    r_fileName: fileName,
+  });
+  const response = await callToService(GEOPROCESS_SELECTED_REGION_URL, body);
+  return response;
 }
 
 function manageDrawControl(

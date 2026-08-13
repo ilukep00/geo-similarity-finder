@@ -7,3 +7,5 @@ mercantile
 fiona
 opencv-python
 google-genai
+shapely
+geopandas

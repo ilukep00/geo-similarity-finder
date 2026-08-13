@@ -3,7 +3,27 @@ from pydantic import BaseModel, Field
 from typing import List
 import cv2
 import numpy as np
-import os 
+import os
+from sam3.model_builder import build_efficientsam3_image_model
+from sam3.model.sam3_image_processor import Sam3Processor
+import numpy as np
+import cv2
+from google import genai
+import os
+import base64
+
+from PIL import Image
+from shapely.geometry import Polygon
+import geopandas as gpd
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJ_DIR = os.path.join(SCRIPT_DIR, "..", "venv", "Lib", "site-packages", "rasterio", "proj_data")
+os.environ["PROJ_LIB"] = PROJ_DIR
+
+# This part is necessary Because PostgreSQL added its own path to the system's global environment variables,
+# rasterio gets confused and looks in your PostgreSQL folder instead of its own.
+
+import rasterio
+from rasterio.transform import Affine
 
 gemini_api_key = os.getenv("GEMINI_API_KEY", "your_api_key")
 class BoundingBox(BaseModel):
@@ -18,23 +38,22 @@ class BoundingBoxes(BaseModel):
 def call_to_google_gen_ai_service():
     client = genai.Client(api_key=gemini_api_key)
 
-    region_of_interest = client.files.upload(file="regionOfInterest.png")
-    region_to_predict = client.files.upload(file="regionToPredict.png")
+    with open("regionOfInterest.png", "rb") as f:
+        roi_b64 = base64.b64encode(f.read()).decode("utf-8")
 
+    with open("regionToPredict.png", "rb") as f:
+        predict_b64 = base64.b64encode(f.read()).decode("utf-8")
+    prompt = (
+        "Given the first image, can you detect the parts of that image that are similar "
+        "to the second part? The return object should be the box_2d as [ymin, xmin, ymax, xmax] "
+        "normalized to 0-1000."
+    )
     interaction = client.interactions.create(
-        model="gemini-3.5-flash",
+        model="gemini-3.1-flash-lite",
         input=[
-            {"type": "text", "text": "Given the first image, can you detect the parts of that image that are similar to the second part? The return object should be the box_2d should be [ymin, xmin, ymax, xmax] normalized to 0-1000."},
-            {
-                "type": "image",
-                "uri": region_of_interest.uri,
-                "mime_type": region_of_interest.mime_type
-            },
-            {
-                "type": "image",
-                "uri": region_to_predict.uri,
-                "mime_type": region_to_predict.mime_type
-            }
+            {"type": "text", "text": prompt},
+            {"type": "image", "data": roi_b64, "mime_type": "image/png"},
+            {"type": "image", "data": predict_b64, "mime_type": "image/png"},
         ],
         response_format={
             "type": "text",
@@ -61,12 +80,99 @@ def add_masks_to_image(image, boxes):
 
     cv2.imwrite('region_of_interest_with_predicted_mask.png', overlay)
 
+def gemini_box_to_sam3_format(box_2d: list[int]) -> list[float]:
+    """
+    Convert [ymin, xmin, ymax, xmax] (0-1000)
+    to [center_x, center_y, width, height] (0.0-1.0)
+    """
+    ymin_n, xmin_n, ymax_n, xmax_n = box_2d
 
+    # 1. Normalizing to range [0.0, 1.0]
+    ymin = ymin_n / 1000.0
+    xmin = xmin_n / 1000.0
+    ymax = ymax_n / 1000.0
+    xmax = xmax_n / 1000.0
+
+    # 2. Calculating the width and height
+    width = xmax - xmin
+    height = ymax - ymin
+
+    # 3. Calculating the center coords
+    center_x = xmin + (width / 2.0)
+    center_y = ymin + (height / 2.0)
+
+    return [center_x, center_y, width, height]
+
+def prediction_with_sam3(box_2, regionOfInterest):
+    box = gemini_box_to_sam3_format(box_2)
+
+    model = build_efficientsam3_image_model(
+        checkpoint_path="efficientsam3_tinyvit.pt",
+        backbone_type="tinyvit",
+        model_name="11m",
+        text_encoder_type="MobileCLIP-S0",
+        text_encoder_context_length=16,
+        load_from_HF=False,
+    )
+
+    # Process image
+    processor = Sam3Processor(model)
+
+    state = processor.set_image(regionOfInterest)
+    state = processor.set_confidence_threshold(threshold=0.20, state=state)
+    state = processor.add_geometric_prompt(box, True, state)
+    return state
+
+def converting_mask_to_polygon(mask):
+    mask_uint8 = mask.astype(np.uint8)
+    contours, _ = cv2.findContours(mask_uint8, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    crop_x_offset = 0  # Initial pixel x
+    crop_y_offset = 0  # Initial pixel y
+
+    with rasterio.open("regionOfInterest.tif") as src:
+        transform_original = src.transform
+        crs_original = src.crs
+
+    transform_crop = transform_original * Affine.translation(
+        crop_x_offset, crop_y_offset
+    )
+
+    polygons = []
+
+    for contour in contours:
+        if len(contour) > 3:
+            points = contour.reshape(-1, 2)
+            geo_points = [transform_crop * (px, py) for px, py in points]
+            polygon = Polygon(geo_points)
+            polygons.append(polygon)
+
+    if len(polygons) > 0:
+        gdf = gpd.GeoDataFrame(geometry=polygons, crs="EPSG:3857")
+        gdf.to_file("mask.geojson", driver="GeoJSON")
 
 def googleGenAIService():
    items = call_to_google_gen_ai_service()
+   if items == None:
+       return
    image = cv2.imread('regionOfInterest.png')
    add_masks_to_image(image, items.boxes)
+   return items
 
 def similarRegionsService():
-    googleGenAIService()
+    items = googleGenAIService()
+
+    for item in items.boxes:
+        regionOfInterest = Image.open("regionOfInterest.png").convert("RGB");
+
+        state = prediction_with_sam3(item.box_2d, regionOfInterest)
+
+        # Get masks
+        masks = state["masks"]
+        final_mask = np.zeros((regionOfInterest.size[1], regionOfInterest.size[0]))
+        for mask in masks:
+            mask_resized = mask.reshape((mask.shape[1], mask.shape[2]))
+            mask_2d = np.squeeze(np.array(mask_resized)).astype(bool)
+            final_mask[mask_2d] = 255
+
+        converting_mask_to_polygon(final_mask)

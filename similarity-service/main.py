@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
@@ -34,7 +34,8 @@ async def geo_process_selected_region(item: Region):
 
 @app.post("/findSimilarRegions/")
 async def find_similar_regions():
-    similarRegionsService()
+    geojson_str = similarRegionsService()
+    return Response(content=geojson_str, media_type="application/json")
     
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

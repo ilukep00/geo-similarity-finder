@@ -150,6 +150,7 @@ def converting_mask_to_polygon(mask):
     if len(polygons) > 0:
         gdf = gpd.GeoDataFrame(geometry=polygons, crs="EPSG:3857")
         gdf.to_file("mask.geojson", driver="GeoJSON")
+        return gdf.to_json()
 
 def googleGenAIService():
    items = call_to_google_gen_ai_service()
@@ -175,4 +176,4 @@ def similarRegionsService():
             mask_2d = np.squeeze(np.array(mask_resized)).astype(bool)
             final_mask[mask_2d] = 255
 
-        converting_mask_to_polygon(final_mask)
+        return converting_mask_to_polygon(final_mask)

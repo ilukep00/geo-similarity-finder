@@ -58,7 +58,6 @@ function manageDrawControl(
 ) {
   var drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
-
   const drawControlOptions = {
     position: "topleft",
     draw: {
@@ -85,7 +84,7 @@ function manageDrawControl(
     );
     updateIsProcessing(false);
 
-    if (!result) {
+    if (result === false) {
       console.log("error");
       return;
     }

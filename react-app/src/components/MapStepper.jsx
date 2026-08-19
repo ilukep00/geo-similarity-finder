@@ -36,9 +36,7 @@ export default function MapStepper() {
     if (isStepFailed !== -1) {
       setStepFailed(-1);
     }
-    if (activeStep === steps.length - 1) {
-      await callToService(FIND_SIMILAR_REGIONS_URL);
-    }
+
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
     dispacth(next());
   };

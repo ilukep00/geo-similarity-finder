@@ -7,13 +7,13 @@ const callToService = async (url, body = JSON.stringify({})) => {
     body,
   };
   try {
-    await fetch(url, queryBody).then((response) => {
+    const response = await fetch(url, queryBody).then((response) => {
       if (!response.ok) {
         throw new Error(`HTTP error: ${response.status}`);
       }
       return response.json();
     });
-    return true;
+    return response;
   } catch (error) {
     return false;
   }

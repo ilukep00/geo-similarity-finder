@@ -5,6 +5,7 @@ import {
   AREATOPREDICTADDED,
   REGIONOFINTERESTADDED,
   ISPROCESSING,
+  STEPGEOMETRIESMANAGMENT,
 } from "./actionTypes";
 
 export const next = () => ({
@@ -28,4 +29,9 @@ export const regionOfInterestAdded = (value) => ({
 export const isProcessing = (value) => ({
   type: ISPROCESSING,
   payload: value,
+});
+
+export const stepGeometriesManagment = (step, layerJSON) => ({
+  type: STEPGEOMETRIESMANAGMENT,
+  payload: { step, layerJSON },
 });

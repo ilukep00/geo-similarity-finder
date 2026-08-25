@@ -52,11 +52,12 @@ async function processGeometry(regionJSON, tilesCoords, fileName) {
 
 function manageDrawControl(
   map,
+  drawnItems,
   updateAreaToPredict,
   updateRegionOfInterest,
   updateIsProcessing,
+  updateStepGeometries,
 ) {
-  var drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
   const drawControlOptions = {
     position: "topleft",
@@ -89,6 +90,7 @@ function manageDrawControl(
       return;
     }
     drawnItems.addLayer(layer);
+    updateStepGeometries(state.step - 1, layerJSON);
     if (state.step === 1) {
       updateAreaToPredict(true);
     }
@@ -105,6 +107,7 @@ function manageDrawControl(
     if (state.step === 2) {
       updateRegionOfInterest(false);
     }
+    updateStepGeometries(state.step - 1, null);
   });
 }
 

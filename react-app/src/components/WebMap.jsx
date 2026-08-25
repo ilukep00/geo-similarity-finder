@@ -2,7 +2,10 @@ import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import callToService from "../utils/utilityMethods.js";
 import manageDrawControl from "../mapTools/draw-control.js";
-import { areaToPredictAdded } from "../actions/actions.js";
+import {
+  areaToPredictAdded,
+  stepGeometriesManagment,
+} from "../actions/actions.js";
 import { regionOfInterestAdded } from "../actions/actions.js";
 import { isProcessing } from "../actions/actions.js";
 import L from "leaflet";
@@ -10,12 +13,14 @@ import "../styles/WebMap.css";
 import reprojectGeometry from "../mapTools/reproject-geometry.js";
 
 const WebMap = () => {
+  const FINAL_STEP = 4;
   const FIND_SIMILAR_REGIONS_URL = "http://127.0.0.1:8000/findSimilarRegions/";
 
   const dispacth = useDispatch();
+  const featureGroupRef = useRef(null);
   const mapContainerRef = useRef(null);
   const webMapRef = useRef(null);
-  const { step } = useSelector((state) => state);
+  const { step, stepGeometries } = useSelector((state) => state);
 
   const updateAreaToPredict = (value) => {
     dispacth(areaToPredictAdded(value));
@@ -29,6 +34,10 @@ const WebMap = () => {
     dispacth(isProcessing(value));
   };
 
+  const updateStepGeometries = (step, layerJSON) => {
+    dispacth(stepGeometriesManagment(step, layerJSON));
+  };
+
   useEffect(() => {
     if (webMapRef.current) {
       return;
@@ -37,12 +46,15 @@ const WebMap = () => {
     L.tileLayer(
       "https://www.google.cn/maps/vt?lyrs=s@189&gl=cr&x={x}&y={y}&z={z}",
     ).addTo(webMapRef.current);
+    featureGroupRef.current = new L.FeatureGroup();
 
     manageDrawControl(
       webMapRef.current,
+      featureGroupRef.current,
       updateAreaToPredict,
       updateRegionOfInterest,
       updateIsProcessing,
+      updateStepGeometries,
     );
 
     return () => {
@@ -52,6 +64,24 @@ const WebMap = () => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (featureGroupRef.current) {
+      // Limpiamos todas las capas del FeatureGroup
+      featureGroupRef.current.clearLayers();
+      console.log("Se han borrado las capas porque cambió miVariableEstado");
+      if (
+        step - 1 < stepGeometries.length &&
+        stepGeometries[step - 1] !== null
+      ) {
+        const featureJson = L.geoJSON(stepGeometries[step - 1]);
+        // Iteramos e insertamos cada subcapa individualmente
+        featureJson.eachLayer((layer) => {
+          featureGroupRef.current.addLayer(layer);
+        });
+      }
+    }
+  }, [step]);
 
   useEffect(() => {
     async function callToSimilarityService() {
@@ -70,7 +100,7 @@ const WebMap = () => {
       });
       webMapRef.current.addLayer(drawnItems);
     }
-    if (step === 4) {
+    if (step === FINAL_STEP) {
       callToSimilarityService();
     }
   }, [step]);

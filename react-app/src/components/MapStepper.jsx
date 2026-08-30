@@ -1,13 +1,12 @@
 import * as React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { next, back } from "../actions/actions";
+import { next, back, reset } from "../actions/actions";
 import Box from "@mui/material/Box";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import callToService from "../utils/utilityMethods";
 
 const steps = [
   "Select the area to predict",
@@ -18,7 +17,6 @@ const steps = [
 const errors = ["There is not area selected", "There is not region selected"];
 
 export default function MapStepper() {
-  const FIND_SIMILAR_REGIONS_URL = "http://127.0.0.1:8000/findSimilarRegions/";
   const dispacth = useDispatch();
   const { areaToPredict, regionOfInterest } = useSelector((state) => state);
 
@@ -48,6 +46,7 @@ export default function MapStepper() {
 
   const handleReset = () => {
     setActiveStep(0);
+    dispacth(reset());
   };
 
   const previousActiveStepRef = React.useRef(activeStep);

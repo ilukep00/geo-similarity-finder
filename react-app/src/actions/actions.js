@@ -2,6 +2,7 @@
 import {
   NEXT,
   BACK,
+  RESET,
   AREATOPREDICTADDED,
   REGIONOFINTERESTADDED,
   ISPROCESSING,
@@ -15,6 +16,10 @@ export const next = () => ({
 export const back = () => ({
   type: BACK,
 });
+
+export const reset = () => ({
+  type: RESET
+})
 
 export const areaToPredictAdded = (value) => ({
   type: AREATOPREDICTADDED,

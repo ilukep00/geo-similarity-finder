@@ -1,4 +1,4 @@
-import { BACK, NEXT } from "../actions/actionTypes";
+import { BACK, NEXT, RESET } from "../actions/actionTypes";
 
 const initialState = 1;
 
@@ -10,6 +10,8 @@ const step = (stateStep = initialState, action) => {
     case BACK:
       return stateStep - 1;
 
+    case RESET:
+      return 1;  
     default:
       return stateStep;
   }

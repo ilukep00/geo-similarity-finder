@@ -1,6 +1,13 @@
 import * as React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { next, back, reset } from "../actions/actions";
+import {
+  next,
+  back,
+  reset,
+  stepGeometriesManagment,
+  regionOfInterestAdded,
+  areaToPredictAdded,
+} from "../actions/actions";
 import Box from "@mui/material/Box";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
@@ -47,6 +54,9 @@ export default function MapStepper() {
   const handleReset = () => {
     setActiveStep(0);
     dispacth(reset());
+    dispacth(stepGeometriesManagment(-1, null));
+    dispacth(regionOfInterestAdded(false));
+    dispacth(areaToPredictAdded(false));
   };
 
   const previousActiveStepRef = React.useRef(activeStep);

@@ -5,8 +5,8 @@ import manageDrawControl from "../mapTools/draw-control.js";
 import {
   areaToPredictAdded,
   stepGeometriesManagment,
+  regionOfInterestAdded,
 } from "../actions/actions.js";
-import { regionOfInterestAdded } from "../actions/actions.js";
 import { isProcessing } from "../actions/actions.js";
 import L from "leaflet";
 import "../styles/WebMap.css";
@@ -67,7 +67,6 @@ const WebMap = () => {
 
   useEffect(() => {
     if (featureGroupRef.current) {
-      // Limpiamos todas las capas del FeatureGroup
       featureGroupRef.current.clearLayers();
       console.log("Se han borrado las capas porque cambió miVariableEstado");
       if (
@@ -75,7 +74,6 @@ const WebMap = () => {
         stepGeometries[step - 1] !== null
       ) {
         const featureJson = L.geoJSON(stepGeometries[step - 1]);
-        // Iteramos e insertamos cada subcapa individualmente
         featureJson.eachLayer((layer) => {
           featureGroupRef.current.addLayer(layer);
         });

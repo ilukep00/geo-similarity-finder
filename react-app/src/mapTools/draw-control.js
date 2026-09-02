@@ -89,6 +89,7 @@ function manageDrawControl(
       console.log("error");
       return;
     }
+    drawnItems.clearLayers();
     drawnItems.addLayer(layer);
     updateStepGeometries(state.step - 1, layerJSON);
     if (state.step === 1) {

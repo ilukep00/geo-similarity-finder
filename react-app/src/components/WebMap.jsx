@@ -30,8 +30,8 @@ const WebMap = () => {
     dispacth(regionOfInterestAdded(value));
   };
 
-  const updateIsProcessing = (value) => {
-    dispacth(isProcessing(value));
+  const updateIsProcessing = (openDialog, messageDialog = "The Geometry is being processed") => {
+    dispacth(isProcessing(openDialog,messageDialog));
   };
 
   const updateStepGeometries = (step, layerJSON) => {
@@ -82,7 +82,7 @@ const WebMap = () => {
 
   useEffect(() => {
     async function callToSimilarityService() {
-      updateIsProcessing(true);
+      updateIsProcessing(true, "The similar regions are being predicted");
       const response = await callToService(FIND_SIMILAR_REGIONS_URL);
       updateIsProcessing(false);
       response.features?.forEach((feature) => {

@@ -18,8 +18,8 @@ export const back = () => ({
 });
 
 export const reset = () => ({
-  type: RESET
-})
+  type: RESET,
+});
 
 export const areaToPredictAdded = (value) => ({
   type: AREATOPREDICTADDED,
@@ -31,9 +31,12 @@ export const regionOfInterestAdded = (value) => ({
   payload: value,
 });
 
-export const isProcessing = (value) => ({
+export const isProcessing = (
+  openDialog,
+  messageDialog = "The Geometry is being processed",
+) => ({
   type: ISPROCESSING,
-  payload: value,
+  payload: { openDialog, messageDialog },
 });
 
 export const stepGeometriesManagment = (step, layerJSON) => ({

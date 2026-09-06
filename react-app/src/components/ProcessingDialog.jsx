@@ -11,9 +11,9 @@ const ProcessingDialog = () => {
   }
 
   return (
-    <Dialog open={isProcessing}>
+    <Dialog open={isProcessing.openDialog}>
       <DialogContent>
-        <DialogContentText>The Geometry is being processed</DialogContentText>
+        <DialogContentText>{isProcessing.messageDialog}</DialogContentText>
       </DialogContent>
     </Dialog>
   );

@@ -162,18 +162,17 @@ def googleGenAIService():
 
 def similarRegionsService():
     items = googleGenAIService()
-
+    regionOfInterest = Image.open("regionOfInterest.png").convert("RGB");
+    final_mask = np.zeros((regionOfInterest.size[1], regionOfInterest.size[0]))
+    
     for item in items.boxes:
-        regionOfInterest = Image.open("regionOfInterest.png").convert("RGB");
-
         state = prediction_with_sam3(item.box_2d, regionOfInterest)
 
         # Get masks
         masks = state["masks"]
-        final_mask = np.zeros((regionOfInterest.size[1], regionOfInterest.size[0]))
         for mask in masks:
             mask_resized = mask.reshape((mask.shape[1], mask.shape[2]))
             mask_2d = np.squeeze(np.array(mask_resized)).astype(bool)
             final_mask[mask_2d] = 255
 
-        return converting_mask_to_polygon(final_mask)
+    return converting_mask_to_polygon(final_mask)

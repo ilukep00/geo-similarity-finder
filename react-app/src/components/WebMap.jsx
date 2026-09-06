@@ -68,7 +68,6 @@ const WebMap = () => {
   useEffect(() => {
     if (featureGroupRef.current) {
       featureGroupRef.current.clearLayers();
-      console.log("Se han borrado las capas porque cambió miVariableEstado");
       if (
         step - 1 < stepGeometries.length &&
         stepGeometries[step - 1] !== null
@@ -86,7 +85,6 @@ const WebMap = () => {
       updateIsProcessing(true);
       const response = await callToService(FIND_SIMILAR_REGIONS_URL);
       updateIsProcessing(false);
-      const drawnItems = new L.FeatureGroup();
       response.features?.forEach((feature) => {
         const reprojectedGeoJson = {
           type: feature.type,
@@ -94,9 +92,8 @@ const WebMap = () => {
           geometry: reprojectGeometry(feature.geometry),
         };
         const featureJson = L.geoJSON(reprojectedGeoJson);
-        drawnItems.addLayer(featureJson);
+        featureGroupRef.current.addLayer(featureJson);
       });
-      webMapRef.current.addLayer(drawnItems);
     }
     if (step === FINAL_STEP) {
       callToSimilarityService();

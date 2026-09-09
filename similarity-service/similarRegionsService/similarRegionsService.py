@@ -15,6 +15,7 @@ import base64
 from PIL import Image
 from shapely.geometry import Polygon
 import geopandas as gpd
+import time
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJ_DIR = os.path.join(SCRIPT_DIR, "..", "venv", "Lib", "site-packages", "rasterio", "proj_data")
 os.environ["PROJ_LIB"] = PROJ_DIR
@@ -34,6 +35,13 @@ class BoundingBox(BaseModel):
 class BoundingBoxes(BaseModel):
     boxes: List[BoundingBox]
 
+FREE_MODELS = [
+    "gemini-3.1-flash-lite",
+    "gemini-3.6-flash",
+    "gemini-3.5-flash-lite",
+]
+
+MAX_TRIES_PER_MODEL = 3
 
 def call_to_google_gen_ai_service():
     client = genai.Client(api_key=gemini_api_key)
@@ -48,22 +56,37 @@ def call_to_google_gen_ai_service():
         "to the second part? The return object should be the box_2d as [ymin, xmin, ymax, xmax] "
         "normalized to 0-1000."
     )
-    interaction = client.interactions.create(
-        model="gemini-3.1-flash-lite",
-        input=[
+    input_payload = [
             {"type": "text", "text": prompt},
             {"type": "image", "data": roi_b64, "mime_type": "image/png"},
             {"type": "image", "data": predict_b64, "mime_type": "image/png"},
-        ],
-        response_format={
+        ]
+    response_format = {
             "type": "text",
             "mime_type": "application/json",
             "schema": BoundingBoxes.model_json_schema()
         }
-    )
 
-    items = BoundingBoxes.model_validate_json(interaction.output_text)
-    return items
+    for model in FREE_MODELS:
+        for attempt in range(1,MAX_TRIES_PER_MODEL+1):
+            try:
+                interaction = client.interactions.create(
+                    model=model,
+                    input=input_payload,
+                    response_format=response_format
+                )
+                items = BoundingBoxes.model_validate_json(interaction.output_text)
+                return items
+            except Exception as e:
+                print(f"Attempt {attempt} failed for model: {model} due to this excecption {e}")
+                if attempt < MAX_TRIES_PER_MODEL:
+                    sleep_time = 2 ** (attempt)
+                    time.sleep(sleep_time)
+                else:
+                    print(f"Model {model} has use his three attempts. Trying with the next model")
+
+    raise RuntimeError("Error crítico: Todos los modelos de la lista fallaron tras múltiples intentos.")
+
 
 def add_masks_to_image(image, boxes):
     img_height, img_width = image.shape[:2]

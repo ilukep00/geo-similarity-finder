@@ -9,19 +9,6 @@ const GOOGLE_MAPS_URL =
 const GEOPROCESS_SELECTED_REGION_URL =
   "http://127.0.0.1:8000/geoProcessSelectedRegion/";
 
-const DRAW_VECTORTYPES_SETTINGS = {
-  polyline: false,
-  polygon: {
-    shapeOptions: {
-      color: "#bada55",
-    },
-  },
-  circle: false,
-  rectangle: false,
-  marker: false,
-  circlemarker: false,
-};
-
 function prepareTilesCoordinates(layers) {
   const baseLayerKey = Object.keys(layers).find((layerKey) => {
     return layers[layerKey]._url === GOOGLE_MAPS_URL;
@@ -58,19 +45,6 @@ function manageDrawControl(
   updateIsProcessing,
   updateStepGeometries,
 ) {
-  map.addLayer(drawnItems);
-  const drawControlOptions = {
-    position: "topleft",
-    draw: {
-      ...DRAW_VECTORTYPES_SETTINGS,
-    },
-    edit: {
-      featureGroup: drawnItems,
-    },
-  };
-  var drawControl = new L.Control.Draw(drawControlOptions);
-  map.addControl(drawControl);
-
   map.on(L.Draw.Event.CREATED, async function (e) {
     const state = store.getState();
     const { layer, target = { _layers: {} } } = e;

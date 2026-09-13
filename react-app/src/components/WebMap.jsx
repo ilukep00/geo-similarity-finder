@@ -15,8 +15,21 @@ import reprojectGeometry from "../mapTools/reproject-geometry.js";
 const WebMap = () => {
   const FINAL_STEP = 4;
   const FIND_SIMILAR_REGIONS_URL = "http://127.0.0.1:8000/findSimilarRegions/";
+  const DRAW_VECTORTYPES_SETTINGS = {
+    polyline: false,
+    polygon: {
+      shapeOptions: {
+        color: "#bada55",
+      },
+    },
+    circle: false,
+    rectangle: false,
+    marker: false,
+    circlemarker: false,
+  };
 
   const dispacth = useDispatch();
+  const drawControlRef = useRef(null);
   const featureGroupRef = useRef(null);
   const mapContainerRef = useRef(null);
   const webMapRef = useRef(null);
@@ -30,14 +43,30 @@ const WebMap = () => {
     dispacth(regionOfInterestAdded(value));
   };
 
-  const updateIsProcessing = (openDialog, messageDialog = "The Geometry is being processed") => {
-    dispacth(isProcessing(openDialog,messageDialog));
+  const updateIsProcessing = (
+    openDialog,
+    messageDialog = "The Geometry is being processed",
+  ) => {
+    dispacth(isProcessing(openDialog, messageDialog));
   };
 
   const updateStepGeometries = (step, layerJSON) => {
     dispacth(stepGeometriesManagment(step, layerJSON));
   };
 
+  const removeDrawControl = () => {
+    if (webMapRef.current && drawControlRef.current) {
+      webMapRef.current.removeControl(drawControlRef.current);
+    }
+  };
+
+  const addDrawControl = () => {
+    if (webMapRef.current && drawControlRef.current) {
+      webMapRef.current.addControl(drawControlRef.current);
+    }
+  };
+
+  // use effect for managing the first render of the map
   useEffect(() => {
     if (webMapRef.current) {
       return;
@@ -46,7 +75,21 @@ const WebMap = () => {
     L.tileLayer(
       "https://www.google.cn/maps/vt?lyrs=s@189&gl=cr&x={x}&y={y}&z={z}",
     ).addTo(webMapRef.current);
+
     featureGroupRef.current = new L.FeatureGroup();
+    webMapRef.current.addLayer(featureGroupRef.current);
+
+    const drawControlOptions = {
+      position: "topleft",
+      draw: {
+        ...DRAW_VECTORTYPES_SETTINGS,
+      },
+      edit: {
+        featureGroup: featureGroupRef.current,
+      },
+    };
+    drawControlRef.current = new L.Control.Draw(drawControlOptions);
+    webMapRef.current.addControl(drawControlRef.current);
 
     manageDrawControl(
       webMapRef.current,
@@ -65,6 +108,7 @@ const WebMap = () => {
     };
   }, []);
 
+  // use effect for managing the geometry to show in each step
   useEffect(() => {
     if (featureGroupRef.current) {
       featureGroupRef.current.clearLayers();
@@ -80,6 +124,7 @@ const WebMap = () => {
     }
   }, [step]);
 
+  // use effect for managing the calling to the similarity service
   useEffect(() => {
     async function callToSimilarityService() {
       updateIsProcessing(true, "The similar regions are being predicted");
@@ -97,6 +142,15 @@ const WebMap = () => {
     }
     if (step === FINAL_STEP) {
       callToSimilarityService();
+    }
+  }, [step]);
+
+  // use effect for managing when the draw control should appear
+  useEffect(() => {
+    if (step === FINAL_STEP) {
+      removeDrawControl();
+    } else {
+      addDrawControl();
     }
   }, [step]);
 

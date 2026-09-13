@@ -118,6 +118,7 @@ const WebMap = () => {
       ) {
         const featureJson = L.geoJSON(stepGeometries[step - 1]);
         featureJson.eachLayer((layer) => {
+          layer.options.color = '#bada55';
           featureGroupRef.current.addLayer(layer);
         });
       }
@@ -137,6 +138,7 @@ const WebMap = () => {
           geometry: reprojectGeometry(feature.geometry),
         };
         const featureJson = L.geoJSON(reprojectedGeoJson);
+        featureJson.options.color = '#bada55';
         featureGroupRef.current.addLayer(featureJson);
       });
     }

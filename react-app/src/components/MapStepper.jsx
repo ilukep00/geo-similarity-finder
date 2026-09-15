@@ -14,6 +14,7 @@ import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import downloadAreaPredicted from "../mapTools/download-area-predicted";
 
 const steps = [
   "Select the area to predict",
@@ -57,6 +58,10 @@ export default function MapStepper() {
     dispacth(stepGeometriesManagment(-1, null));
     dispacth(regionOfInterestAdded(false));
     dispacth(areaToPredictAdded(false));
+  };
+
+  const handleDownload = () => {
+    downloadAreaPredicted();
   };
 
   const previousActiveStepRef = React.useRef(activeStep);
@@ -117,6 +122,7 @@ export default function MapStepper() {
             <Button onClick={handleReset} ref={resetButtonRef}>
               Reset
             </Button>
+            <Button onClick={handleDownload}>Download</Button>
           </Box>
         </React.Fragment>
       ) : (

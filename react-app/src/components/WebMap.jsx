@@ -6,6 +6,7 @@ import {
   areaToPredictAdded,
   stepGeometriesManagment,
   regionOfInterestAdded,
+  storePrediction,
 } from "../actions/actions.js";
 import { isProcessing } from "../actions/actions.js";
 import L from "leaflet";
@@ -41,6 +42,10 @@ const WebMap = () => {
 
   const updateRegionOfInterest = (value) => {
     dispacth(regionOfInterestAdded(value));
+  };
+
+  const updateAreaPredicted = (value) => {
+    dispacth(storePrediction(value));
   };
 
   const updateIsProcessing = (
@@ -118,7 +123,7 @@ const WebMap = () => {
       ) {
         const featureJson = L.geoJSON(stepGeometries[step - 1]);
         featureJson.eachLayer((layer) => {
-          layer.options.color = '#bada55';
+          layer.options.color = "#bada55";
           featureGroupRef.current.addLayer(layer);
         });
       }
@@ -131,16 +136,27 @@ const WebMap = () => {
       updateIsProcessing(true, "The similar regions are being predicted");
       const response = await callToService(FIND_SIMILAR_REGIONS_URL);
       updateIsProcessing(false);
+      const jsonToSave = {
+        ...response,
+        crs: {
+          ...response.crs,
+          properties: { name: "urn:ogc:def:crs:EPSG::4326" },
+        },
+      };
+      let i = 0;
       response.features?.forEach((feature) => {
         const reprojectedGeoJson = {
           type: feature.type,
           properties: feature.properties,
           geometry: reprojectGeometry(feature.geometry),
         };
+        jsonToSave.features[i] = reprojectedGeoJson;
         const featureJson = L.geoJSON(reprojectedGeoJson);
-        featureJson.options.color = '#bada55';
+        featureJson.options.color = "#bada55";
         featureGroupRef.current.addLayer(featureJson);
+        i += 1;
       });
+      updateAreaPredicted(jsonToSave);
     }
     if (step === FINAL_STEP) {
       callToSimilarityService();

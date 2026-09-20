@@ -12,6 +12,8 @@ import { isProcessing } from "../actions/actions.js";
 import L from "leaflet";
 import "../styles/WebMap.css";
 import reprojectGeometry from "../mapTools/reproject-geometry.js";
+import "leaflet-control-geocoder/dist/Control.Geocoder.css";
+import "leaflet-control-geocoder";
 
 const WebMap = () => {
   const FINAL_STEP = 4;
@@ -83,6 +85,19 @@ const WebMap = () => {
 
     featureGroupRef.current = new L.FeatureGroup();
     webMapRef.current.addLayer(featureGroupRef.current);
+
+    const geocoderService = L.Control.Geocoder.arcgis();
+    L.Control.geocoder({
+      defaultMarkGeocode: false, // Prevents default marker so you can customize behavior
+      geocoder: geocoderService,
+    })
+      .on("markgeocode", (e) => {
+        const { bbox } = e.geocode;
+
+        // Fit map bounds to the result or fly to the point
+        webMapRef.current.fitBounds(bbox);
+      })
+      .addTo(webMapRef.current);
 
     const drawControlOptions = {
       position: "topleft",

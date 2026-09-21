@@ -9,23 +9,56 @@ const GOOGLE_MAPS_URL =
 const GEOPROCESS_SELECTED_REGION_URL =
   "http://127.0.0.1:8000/geoProcessSelectedRegion/";
 
-function prepareTilesCoordinates(layers) {
+// Method for converting (x, y, z) in a tile L.latLngBounds
+function getTileLatLngBounds(x, y, z) {
+  // number of tiles
+  const tileCount = Math.pow(2, z);
+
+  // west border
+  const lng1 = (x / tileCount) * 360 - 180;
+  // east border
+  const lng2 = ((x + 1) / tileCount) * 360 - 180;
+
+  // south border
+  const lat1Rad = Math.atan(
+    Math.sinh(Math.PI * (1 - (2 * (y + 1)) / tileCount)),
+  );
+  // northern border
+  const lat2Rad = Math.atan(Math.sinh(Math.PI * (1 - (2 * y) / tileCount)));
+
+  // degrees conversion
+  const lat1 = (lat1Rad * 180) / Math.PI;
+  const lat2 = (lat2Rad * 180) / Math.PI;
+
+  return L.latLngBounds([lat1, lng1], [lat2, lng2]);
+}
+
+function prepareTilesCoordinates(layers, drawnLayer) {
   const baseLayerKey = Object.keys(layers).find((layerKey) => {
     return layers[layerKey]._url === GOOGLE_MAPS_URL;
   });
 
-  const baseLayerTiles = layers[baseLayerKey]._tiles;
+  if (!baseLayerKey) return [];
 
-  const tilesCoords = Object.keys(baseLayerTiles).map((baseLayerTileKey) => {
-    const baseLayerTile = baseLayerTiles[baseLayerTileKey];
-    return {
-      x: baseLayerTile.coords.x,
-      y: baseLayerTile.coords.y,
-      z: baseLayerTile.coords.z,
-    };
+  const baseLayerTiles = layers[baseLayerKey]._tiles;
+  const geometryBounds = drawnLayer.getBounds();
+
+  const filteredTiles = [];
+
+  Object.keys(baseLayerTiles).forEach((baseLayerTileKey) => {
+    const tile = baseLayerTiles[baseLayerTileKey];
+    const tileBounds = getTileLatLngBounds(tile.coords.x, tile.coords.y, tile.coords.z);
+
+    if (geometryBounds.intersects(tileBounds)) {
+      filteredTiles.push({
+        x: tile.coords.x,
+        y: tile.coords.y,
+        z: tile.coords.z,
+      });
+    }
   });
 
-  return tilesCoords;
+  return filteredTiles;
 }
 async function processGeometry(regionJSON, tilesCoords, fileName) {
   const body = JSON.stringify({
@@ -49,7 +82,7 @@ function manageDrawControl(
     const state = store.getState();
     const { layer, target = { _layers: {} } } = e;
     const layerJSON = layer.toGeoJSON();
-    const tilesCoords = prepareTilesCoordinates(target._layers);
+    const tilesCoords = prepareTilesCoordinates(target._layers, layer);
 
     updateIsProcessing(true);
     const result = await processGeometry(
